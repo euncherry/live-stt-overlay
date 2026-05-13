@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "Live STT Overlay",
+    "slug": "live-stt-overlay",
+    "version": "0.1.0",
+    "orientation": "landscape",
+    "scheme": "livesttoverlay",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "requireFullScreen": true,
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "음성을 텍스트로 변환하기 위해 마이크 권한이 필요합니다.",
+        "NSSpeechRecognitionUsageDescription": "기기 내 음성 인식을 위해 권한이 필요합니다."
+      }
+    },
+    "android": {
+      "package": "com.livesttoverlay.app",
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "음성을 텍스트로 변환하기 위해 마이크 권한이 필요합니다.",
+          "speechRecognitionPermission": "기기 내 음성 인식을 위해 권한이 필요합니다.",
+          "androidSpeechServicePackages": ["com.google.android.googlequicksearchbox"]
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
