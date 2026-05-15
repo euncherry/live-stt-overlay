@@ -13,7 +13,7 @@ export function ControlBar() {
   const theme = useSettingsStore((s) => s.theme);
   const tokens = themes[theme];
   const resetTranscript = useSttStore((s) => s.resetTranscript);
-  const { start, stop } = useSpeechRecognition();
+  const { start, stop, modelReady } = useSpeechRecognition();
 
   const handleStart = () => {
     resetTranscript();
@@ -32,7 +32,11 @@ export function ControlBar() {
       </View>
       <View style={styles.actions}>
         <ThemeToggle />
-        <StartStopButton onStart={handleStart} onStop={stop} />
+        <StartStopButton
+          onStart={handleStart}
+          onStop={stop}
+          loading={!modelReady}
+        />
       </View>
     </View>
   );

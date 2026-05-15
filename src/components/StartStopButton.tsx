@@ -1,5 +1,11 @@
 import { Mic, Square } from 'lucide-react-native';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
 import { TOUCH_TARGET_MIN } from '@/constants/layout';
 import { themes } from '@/constants/theme';
@@ -9,14 +15,22 @@ import { useSttStore } from '@/store/sttStore';
 interface StartStopButtonProps {
   onStart: () => void;
   onStop: () => void;
+  disabled?: boolean;
+  loading?: boolean;
 }
 
-export function StartStopButton({ onStart, onStop }: StartStopButtonProps) {
+export function StartStopButton({
+  onStart,
+  onStop,
+  disabled = false,
+  loading = false,
+}: StartStopButtonProps) {
   const theme = useSettingsStore((s) => s.theme);
   const isListening = useSttStore((s) => s.isListening);
   const tokens = themes[theme];
 
   const handlePress = () => {
+    if (disabled || loading) return;
     if (isListening) {
       onStop();
     } else {
@@ -24,22 +38,35 @@ export function StartStopButton({ onStart, onStop }: StartStopButtonProps) {
     }
   };
 
-  const label = isListening ? '중지' : '시작';
+  const label = loading ? '모델 준비 중' : isListening ? '중지' : '시작';
   const bg = isListening ? '#E04A4A' : tokens.accent;
+  const inactive = disabled || loading;
 
   return (
     <Pressable
       onPress={handlePress}
       accessibilityRole="button"
-      accessibilityLabel={isListening ? '음성 인식 중지' : '음성 인식 시작'}
+      accessibilityState={{ disabled: inactive }}
+      accessibilityLabel={
+        loading
+          ? '음성 인식 모델 준비 중'
+          : isListening
+            ? '음성 인식 중지'
+            : '음성 인식 시작'
+      }
       hitSlop={8}
       style={({ pressed }) => [
         styles.container,
-        { backgroundColor: bg, opacity: pressed ? 0.85 : 1 },
+        {
+          backgroundColor: bg,
+          opacity: inactive ? 0.6 : pressed ? 0.85 : 1,
+        },
       ]}
     >
       <View style={styles.iconWrap}>
-        {isListening ? (
+        {loading ? (
+          <ActivityIndicator color="#FFFFFF" size="small" />
+        ) : isListening ? (
           <Square size={20} color="#FFFFFF" strokeWidth={2.4} fill="#FFFFFF" />
         ) : (
           <Mic size={22} color="#FFFFFF" strokeWidth={2.4} />
@@ -56,7 +83,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: TOUCH_TARGET_MIN,
-    minWidth: TOUCH_TARGET_MIN * 2.2,
+    minWidth: TOUCH_TARGET_MIN * 2.4,
     paddingHorizontal: 18,
     borderRadius: 12,
     gap: 8,
