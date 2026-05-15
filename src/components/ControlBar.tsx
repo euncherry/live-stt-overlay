@@ -16,6 +16,7 @@ export function ControlBar() {
   const { start, stop, modelReady } = useSpeechRecognition();
 
   const handleStart = () => {
+    console.log(`[ui] StartStopButton pressed, modelReady=${modelReady}`);
     resetTranscript();
     void start();
   };

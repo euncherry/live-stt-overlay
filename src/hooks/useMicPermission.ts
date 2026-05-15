@@ -20,11 +20,14 @@ const RECORD_AUDIO = PermissionsAndroid.PERMISSIONS.RECORD_AUDIO;
 
 async function refreshAndroid(): Promise<PermissionStatus> {
   const has = await PermissionsAndroid.check(RECORD_AUDIO);
+  console.log(`[mic] PermissionsAndroid.check(RECORD_AUDIO) → ${has}`);
   return has ? 'granted' : 'undetermined';
 }
 
 async function requestAndroid(): Promise<PermissionStatus> {
+  console.log('[mic] PermissionsAndroid.request(RECORD_AUDIO) called');
   const result = await PermissionsAndroid.request(RECORD_AUDIO);
+  console.log(`[mic] request returned: ${result}`);
   if (result === PermissionsAndroid.RESULTS.GRANTED) return 'granted';
   return 'denied';
 }
@@ -36,19 +39,20 @@ export function useMicPermission(): UseMicPermissionResult {
 
   const refresh = useCallback(async (): Promise<PermissionStatus> => {
     if (Platform.OS !== 'android') {
+      console.log('[mic] non-android platform → granted');
       setStatus('granted');
       return 'granted';
     }
     const next = await refreshAndroid();
-    setStatus((prev) => {
-      if (next === 'granted') return 'granted';
-      return requestedRef.current ? 'denied' : 'undetermined';
-    });
-    return next === 'granted'
-      ? 'granted'
-      : requestedRef.current
-        ? 'denied'
-        : 'undetermined';
+    const resolved: PermissionStatus =
+      next === 'granted'
+        ? 'granted'
+        : requestedRef.current
+          ? 'denied'
+          : 'undetermined';
+    console.log(`[mic] refresh resolved → ${resolved}`);
+    setStatus(resolved);
+    return resolved;
   }, []);
 
   const request = useCallback(async (): Promise<PermissionStatus> => {
@@ -63,21 +67,30 @@ export function useMicPermission(): UseMicPermissionResult {
   }, []);
 
   const openSettings = useCallback(async () => {
+    console.log('[mic] openSettings()');
     await Linking.openSettings();
   }, []);
 
   useEffect(() => {
+    console.log('[mic] hook mount → initial refresh');
     void refresh();
     const sub = AppState.addEventListener('change', (nextState) => {
+      console.log(
+        `[mic] AppState change: ${appState.current} → ${nextState}`,
+      );
       if (
         appState.current.match(/inactive|background/) &&
         nextState === 'active'
       ) {
+        console.log('[mic] returned to foreground → refresh');
         void refresh();
       }
       appState.current = nextState;
     });
-    return () => sub.remove();
+    return () => {
+      console.log('[mic] hook unmount');
+      sub.remove();
+    };
   }, [refresh]);
 
   return { status, request, refresh, openSettings };

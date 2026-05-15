@@ -17,11 +17,14 @@ export default function PermissionScreen() {
   const requestedRef = useRef(false);
 
   useEffect(() => {
+    console.log(`[permission-screen] effect, status=${status}`);
     if (status === 'granted') {
+      console.log('[permission-screen] granted → navigating to /main');
       router.replace('/main');
       return;
     }
     if (status === 'undetermined' && !requestedRef.current) {
+      console.log('[permission-screen] undetermined → triggering request');
       requestedRef.current = true;
       void request();
     }

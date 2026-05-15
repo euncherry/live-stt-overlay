@@ -22,11 +22,20 @@ export const useSttStore = create<SttState>((set) => ({
         const next = state.transcript.length
           ? `${state.transcript} ${text}`.trim()
           : text.trim();
+        console.log(
+          `[store] appendTranscript final → transcript length ${next.length}`,
+        );
         return { transcript: next, interimSegment: '' };
       }
       return { interimSegment: text };
     }),
-  resetTranscript: () => set({ transcript: '', interimSegment: '' }),
-  setListening: (v) => set({ isListening: v }),
+  resetTranscript: () => {
+    console.log('[store] resetTranscript');
+    set({ transcript: '', interimSegment: '' });
+  },
+  setListening: (v) => {
+    console.log(`[store] setListening(${v})`);
+    set({ isListening: v });
+  },
   setAutoScrollPaused: (v) => set({ autoScrollPaused: v }),
 }));

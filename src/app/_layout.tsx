@@ -13,11 +13,10 @@ export default function RootLayout() {
   const tokens = themes[theme];
 
   useEffect(() => {
-    ScreenOrientation.lockAsync(
-      ScreenOrientation.OrientationLock.LANDSCAPE,
-    ).catch(() => {
-      /* ignore: some emulators may reject orientation locks */
-    });
+    console.log('[layout] mounted, locking orientation to landscape');
+    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE)
+      .then(() => console.log('[layout] orientation locked'))
+      .catch((e) => console.warn('[layout] orientation lock failed:', e));
   }, []);
 
   return (
