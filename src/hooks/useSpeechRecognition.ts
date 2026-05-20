@@ -2,7 +2,7 @@ import {
   ExpoSpeechRecognitionModule,
   useSpeechRecognitionEvent,
 } from 'expo-speech-recognition';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 import { useSttStore } from '@/store/sttStore';
 
@@ -14,14 +14,17 @@ interface UseSpeechRecognitionResult {
 export function useSpeechRecognition(): UseSpeechRecognitionResult {
   const appendTranscript = useSttStore((s) => s.appendTranscript);
   const setListening = useSttStore((s) => s.setListening);
+  const stoppingRef = useRef(false);
 
   useSpeechRecognitionEvent('start', () => {
     console.log('[stt] event: start');
+    stoppingRef.current = false;
     setListening(true);
   });
 
   useSpeechRecognitionEvent('end', () => {
     console.log('[stt] event: end');
+    stoppingRef.current = false;
     setListening(false);
   });
 
@@ -35,12 +38,22 @@ export function useSpeechRecognition(): UseSpeechRecognitionResult {
   });
 
   useSpeechRecognitionEvent('error', (event) => {
+    // Android's SpeechRecognizer emits a benign "client"/"aborted" error
+    // when recognition is cut short by a deliberate stop().
+    if (
+      stoppingRef.current &&
+      (event.error === 'client' || event.error === 'aborted')
+    ) {
+      console.log('[stt] benign error on stop, ignored:', event.error);
+      return;
+    }
     console.warn('[stt] event: error', event.error, event.message);
     setListening(false);
   });
 
   const start = useCallback(async () => {
     console.log('[stt] start() called');
+    stoppingRef.current = false;
     try {
       const perm = await ExpoSpeechRecognitionModule.getPermissionsAsync();
       console.log('[stt] permission status:', perm.status);
@@ -60,6 +73,7 @@ export function useSpeechRecognition(): UseSpeechRecognitionResult {
 
   const stop = useCallback(() => {
     console.log('[stt] stop() called');
+    stoppingRef.current = true;
     try {
       ExpoSpeechRecognitionModule.stop();
     } catch (err) {
