@@ -9,7 +9,3 @@ android/
 .env*
 !.env.example
 expo-env.d.ts
-
-# Vosk model files (download separately, too large to commit)
-models/*
-!models/.gitkeep

@@ -13,10 +13,10 @@ export function ControlBar() {
   const theme = useSettingsStore((s) => s.theme);
   const tokens = themes[theme];
   const resetTranscript = useSttStore((s) => s.resetTranscript);
-  const { start, stop, modelReady } = useSpeechRecognition();
+  const { start, stop } = useSpeechRecognition();
 
   const handleStart = () => {
-    console.log(`[ui] StartStopButton pressed, modelReady=${modelReady}`);
+    console.log('[ui] StartStopButton pressed → start');
     resetTranscript();
     void start();
   };
@@ -33,11 +33,7 @@ export function ControlBar() {
       </View>
       <View style={styles.actions}>
         <ThemeToggle />
-        <StartStopButton
-          onStart={handleStart}
-          onStop={stop}
-          loading={!modelReady}
-        />
+        <StartStopButton onStart={handleStart} onStop={stop} />
       </View>
     </View>
   );
